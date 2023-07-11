@@ -14,3 +14,4 @@ bool Box::Contains(int x, int y)
 	else
 		return false;
 }
+

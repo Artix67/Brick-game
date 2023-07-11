@@ -15,19 +15,26 @@ void Game::Reset()
 	paddle.x_position = 32;
 	paddle.y_position = 30;
 
+	brickVector.clear();
+
 	ball.visage = 'O';
 	ball.color = ConsoleColor::Cyan;
 	ResetBall();
 
 	// TODO #2 - Add this brick and 4 more bricks to the vector
-	for (int x = 0; x < brickVector.size(); x++) {
+	int xAdjustment = 0;
+	
+	for (int x = 0; x < 5; x++) {
 
-		brickVector[x].width = 10;
-		brickVector[x].height = 3;
-		brickVector[x].x_position = brickVector[x].x_position + 15;
-		brickVector[x].y_position = 5;
-		brickVector[x].doubleThick = true;
-		brickVector[x].color = ConsoleColor::DarkGreen;
+		Box brick;
+		brick.width = 10;
+		brick.height = 2;
+		brick.x_position = 5 + xAdjustment;
+		brick.y_position = 5;
+		brick.doubleThick = true;
+		brick.color = ConsoleColor::DarkGreen;
+		xAdjustment = xAdjustment + 15;
+		brickVector.push_back(brick);
 	}
 }
 
@@ -89,20 +96,32 @@ void Game::CheckCollision()
 
 		if (brickVector[x].Contains(ball.x_position + ball.x_velocity, ball.y_position + ball.y_velocity))
 		{
-			brickVector[x].color = ConsoleColor(brickVector[x].color - 1);
+			brickVector[x].color = ConsoleColor(brickVector[x].color + 1);
 			ball.y_velocity *= -1;
 		}
 
-		if (brickVector[x].color == ConsoleColor::DarkGreen - 3) {
+		if (brickVector[x].color == ConsoleColor::DarkGreen + 3) {
 			brickVector.erase(brickVector.begin() + x);
 		}
+	}
+
+	if (paddle.Contains(ball.x_position + ball.x_velocity, ball.y_position + ball.y_velocity)) {
+		ball.y_velocity *= -1;
 	}
 
 	// TODO #6 - If no bricks remain, pause ball and display victory text with R to reset
 
 	if (brickVector.empty()) {
-
+		ball.moving = false;
+		Console::SetCursorPosition(30, 15);
+		std::cout << "No Bricks remain, you win! Press 'R' to restart or close the window..." << "\n";
 	}
 	
 	// TODO #7 - If ball touches bottom of window, pause ball and display defeat text with R to reset
+
+	if (ball.y_position >= 40) {
+		ball.moving = false;
+		Console::SetCursorPosition(30, 15);
+		std::cout << "The ball passed the paddle, you lose! Press 'R' to restart or close the window..." << "\n";
+	}
 }
